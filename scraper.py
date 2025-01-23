@@ -267,7 +267,7 @@ def format_data(data, DynamicListingsContainer, DynamicListingModel, selected_mo
 
     elif selected_model == "gemini-1.5-flash":
         # Use Google Gemini API
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+        genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
         model = genai.GenerativeModel('gemini-1.5-flash',
                 generation_config={
                     "response_mime_type": "application/json",
@@ -410,29 +410,31 @@ def calculate_price(token_counts, model):
 
 
 if __name__ == "__main__":
-    url = 'https://webscraper.io/test-sites/e-commerce/static'
-    fields=['Name of item', 'Price']
+    url = 'https://www.aranca.com/revenue-benchmarks/top-100-korean-companies.php'
+    fields=['Company', 'Sector', 'Industry']
 
     try:
         # # Generate timestamp
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
         # Scrape data
-        raw_html = fetch_html_selenium(url)
+        # raw_html = fetch_html_selenium(url)
     
-        markdown = html_to_markdown_with_readability(raw_html)
-        
+        # markdown = html_to_markdown_with_readability(raw_html)
+        with open('output/rawData_20250123_095437.md', 'r') as f:
+            markdown = f.read()
+        print(markdown)
         # Save raw data
-        save_raw_data(markdown, timestamp)
+        # save_raw_data(markdown, timestamp)
 
         # Create the dynamic listing model
         DynamicListingModel = create_dynamic_listing_model(fields)
-
+        print(DynamicListingModel)
         # Create the container model that holds a list of the dynamic listing models
         DynamicListingsContainer = create_listings_container_model(DynamicListingModel)
-        
+        print(DynamicListingsContainer)
         # Format data
-        formatted_data, token_counts = format_data(markdown, DynamicListingsContainer,DynamicListingModel,"Groq Llama3.1 70b")  # Use markdown, not raw_html
+        formatted_data, token_counts = format_data(markdown, DynamicListingsContainer, DynamicListingModel,"gemini-1.5-flash")  # Use markdown, not raw_html
         print(formatted_data)
         # Save formatted data
         save_formatted_data(formatted_data, timestamp)
